@@ -44,6 +44,11 @@ service cloud.firestore {
         request.resource.data.status == 'no';
     }
 
+    function priceOk() {
+      return !exists(/databases/$(database)/documents/settings/main) ||
+        request.resource.data.price == get(/databases/$(database)/documents/settings/main).data.prices[request.resource.data['service']];
+    }
+
     function orderOk() {
       return request.resource.data.keys().hasOnly(['service', 'name', 'wa', 'phone', 'via', 'username', 'pw', 'price', 'shot', 'uid', 'status', 'ts']) &&
         request.resource.data.uid == request.auth.uid &&
@@ -64,7 +69,8 @@ service cloud.firestore {
         request.resource.data.pw.size() < 700 &&
         request.resource.data.shot is string &&
         request.resource.data.shot.size() < 700000 &&
-        request.resource.data.price is number;
+        request.resource.data.price is number &&
+        priceOk();
     }
 
     match /bootstrap/{code} {
@@ -81,7 +87,7 @@ service cloud.firestore {
       allow read: if signedIn();
       allow create: if signedIn() &&
         request.auth.token.firebase.sign_in_provider == 'password' &&
-        request.resource.data.keys().hasOnly(['uid', 'email', 'pub']) &&
+        request.resource.data.keys().hasOnly(['uid', 'pub']) &&
         request.resource.data.uid == request.auth.uid &&
         getAfter(/databases/$(database)/documents/bootstrap/$('Abq-nPGbf4r826PNmrZeIndqpJjEMPRS')).data.uid == request.auth.uid &&
         !exists(/databases/$(database)/documents/config/owner);
@@ -91,14 +97,16 @@ service cloud.firestore {
     match /users/{uid} {
       allow read: if signedIn() && request.auth.uid == uid;
       allow create, update: if signedIn() && request.auth.uid == uid &&
-        request.resource.data.keys().hasOnly(['lo', 'lm']);
+        request.resource.data.keys().hasOnly(['lo', 'lm']) &&
+        request.resource.data.get('lo', request.time) is timestamp &&
+        request.resource.data.get('lm', request.time) is timestamp;
       allow delete: if false;
     }
 
     match /settings/{docId} {
       allow read: if true;
       allow write: if isAdmin() &&
-        request.resource.data.keys().hasOnly(['prices', 'pay', 'support']) &&
+        request.resource.data.keys().hasOnly(['prices', 'pay', 'support', 'img']) &&
         request.resource.data.prices.python is number &&
         request.resource.data.prices.js is number &&
         request.resource.data.prices.fin is number &&
@@ -127,6 +135,10 @@ service cloud.firestore {
             get(/databases/$(database)/documents/orders/$(orderId)).data.uid == request.auth.uid));
         allow update, delete: if false;
       }
+    }
+
+    match /{document=**} {
+      allow read, write: if isAdmin();
     }
   }
 }

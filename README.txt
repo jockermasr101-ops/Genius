@@ -1,15 +1,28 @@
-تشغيل موقع العبقري بحماية مشددة (مشروع Firebase: abkary-132ab)
+موقع العبقري - دليل التشغيل والأمان
 
-1) Authentication > Sign-in method: فعّل Anonymous و Email/Password.
-2) firestore.rules: غيّر CHANGE_ME_TO_A_LONG_SECRET_CODE لكود سري طويل (20+ حرف) واحتفظ به،
-   ثم الصق الملف في Firestore > Rules واضغط Publish.
-3) App Check (يمنع السكربتات والبوتات):
-   Build > App Check > Apps > سجّل تطبيق الويب بـ reCAPTCHA v3 وانسخ الـ Site Key،
-   ضعه مكان PUT_RECAPTCHA_V3_SITE_KEY في index.html، ثم Enforce لـ Firestore و Authentication.
-4) Authentication > Settings > Authorized domains: أضف دومينك فقط.
-5) Google Cloud > APIs & Services > Credentials: قيّد الـ API key على دومينك (HTTP referrers).
-6) ارفع الموقع على Firebase Hosting (firebase deploy) ليتفعّل ملف firebase.json (HSTS, X-Frame-Options...).
-7) افتح رابطك/#admin فورًا: سجّل البريد + باسورد 12 حرف+ + كود التفعيل.
-   سيُنزَّل ملف abqari-owner-key.json: احفظه نسختين (فلاشة + مكان آمن). بدونه لا يمكن قراءة كلمات المرور.
-   عند كل دخول استورد الملف من لوحة التحكم لإظهار الباسورد (يبقى في الذاكرة فقط).
-8) فعّل التحقق بخطوتين للمالك من Google Cloud > Identity Platform (MFA).
+[1] Firebase (مشروع abkary-132ab)
+  - Authentication > Sign-in method: فعّل Anonymous و Email/Password.
+  - Firestore Database > Create database.
+  - Firestore > Rules: الصق ملف firestore.rules كاملًا واضغط Publish.
+  - Authentication > Settings > Authorized domains: أضف دومين Vercel الخاص بك.
+
+[2] Vercel (Settings > Environment Variables) ثم Redeploy
+  CLOUDINARY_CLOUD_NAME , CLOUDINARY_API_KEY , CLOUDINARY_API_SECRET , OWNER_EMAIL
+  (من Cloudinary > Settings > API Keys. السري لا يُرسل لأحد ولا يوضع في الكود.)
+  لازم ترفع مجلد api مع الموقع.
+
+[3] Cloudinary
+  - احذف أو عطّل الـ Unsigned preset (w7mk0hd2).
+
+[4] حساب المالك
+  - افتح رابط-موقعك/#admin وسجّل: بريد + باسورد 12 حرف فأكثر (حروف وأرقام) + كود التفعيل.
+  - سيُنزَّل ملف abqari-owner-key.json: احفظه في مكانين. بدونه لا تُقرأ كلمات مرور العملاء.
+  - سجّل فور النشر قبل أن يسبقك أحد.
+
+[5] حماية إضافية (من لوحة Firebase / Google، لا تُفعَّل من الكود)
+  - App Check: سجّل reCAPTCHA v3، ضع الـ Site Key مكان PUT_RECAPTCHA_V3_SITE_KEY في index.html ثم Enforce.
+  - Google Cloud > Credentials: قيّد الـ API key على دومينك.
+  - فعّل التحقق بخطوتين (MFA) لحساب المالك من Identity Platform.
+
+[6] اختبار
+  - اطلب خدمة كعميل، ثم تأكد أن الطلب ظهر في #admin، وجرّب الشات ورفع صورة QR.
