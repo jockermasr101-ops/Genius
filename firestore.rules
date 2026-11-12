@@ -1,74 +1,130 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // غيّر هذا الكود لكود سري طويل (٢٠ حرفًا فأكثر) قبل النشر. يُستخدم مرة واحدة عند إنشاء حساب المالك.
-    function SETUP() { return 'CHANGE_ME_TO_A_LONG_SECRET_CODE'; }
-    function root() { return /databases/$(database)/documents; }
-    function isAdmin() { return request.auth != null && exists(/databases/$(database)/documents/config/owner)
-      && get(/databases/$(database)/documents/config/owner).data.uid == request.auth.uid; }
-    function me() { return request.auth != null; }
-    // حد المعدّل: لا أكثر من عملية كل s ثانية لكل مستخدم
-    function fresh(f, s) {
-      let p = /databases/$(database)/documents/users/$(request.auth.uid);
-      return getAfter(p).data[f] == request.time
-        && (!exists(p) || !(f in get(p).data) || get(p).data[f] < request.time - duration.value(s, 's'));
+
+    function signedIn() {
+      return request.auth != null;
     }
 
-    match /bootstrap/{c} {
-      allow create: if me() && request.auth.token.firebase.sign_in_provider == 'password'
-        && c == SETUP() && request.resource.data.keys().hasOnly(['uid']) && request.resource.data.uid == request.auth.uid
-        && !exists(/databases/$(database)/documents/config/owner);
+    function isAdmin() {
+      return request.auth != null &&
+        exists(/databases/$(database)/documents/config/owner) &&
+        get(/databases/$(database)/documents/config/owner).data.uid == request.auth.uid;
+    }
+
+    function userPath() {
+      return /databases/$(database)/documents/users/$(request.auth.uid);
+    }
+
+    function orderRateOk() {
+      return getAfter(userPath()).data.lo == request.time &&
+        (!exists(userPath()) ||
+         get(userPath()).data.get('lo', timestamp.date(2000, 1, 1)) < request.time - duration.value(60, 's'));
+    }
+
+    function msgRateOk() {
+      return getAfter(userPath()).data.lm == request.time &&
+        (!exists(userPath()) ||
+         get(userPath()).data.get('lm', timestamp.date(2000, 1, 1)) < request.time - duration.value(2, 's'));
+    }
+
+    function serviceOk() {
+      return request.resource.data['service'] == 'python' ||
+        request.resource.data['service'] == 'js' ||
+        request.resource.data['service'] == 'fin';
+    }
+
+    function viaOk() {
+      return request.resource.data.via == 'wa' || request.resource.data.via == 'phone';
+    }
+
+    function statusOk() {
+      return request.resource.data.status == 'new' ||
+        request.resource.data.status == 'ok' ||
+        request.resource.data.status == 'no';
+    }
+
+    function orderOk() {
+      return request.resource.data.keys().hasOnly(['service', 'name', 'wa', 'phone', 'via', 'username', 'pw', 'price', 'shot', 'uid', 'status', 'ts']) &&
+        request.resource.data.uid == request.auth.uid &&
+        request.resource.data.status == 'new' &&
+        request.resource.data.ts == request.time &&
+        serviceOk() &&
+        viaOk() &&
+        request.resource.data.name is string &&
+        request.resource.data.name.size() >= 2 &&
+        request.resource.data.name.size() <= 60 &&
+        request.resource.data.wa is string &&
+        request.resource.data.wa.matches('^\\+?[0-9]{8,15}$') &&
+        request.resource.data.phone is string &&
+        request.resource.data.phone.matches('^\\+?[0-9]{8,15}$') &&
+        request.resource.data.username is string &&
+        request.resource.data.username.matches('^[A-Za-z0-9_.-]{3,30}$') &&
+        request.resource.data.pw is string &&
+        request.resource.data.pw.size() < 700 &&
+        request.resource.data.shot is string &&
+        request.resource.data.shot.size() < 700000 &&
+        request.resource.data.price is number;
+    }
+
+    match /bootstrap/{code} {
+      allow create: if signedIn() &&
+        request.auth.token.firebase.sign_in_provider == 'password' &&
+        code == 'Abq-nPGbf4r826PNmrZeIndqpJjEMPRS' &&
+        request.resource.data.keys().hasOnly(['uid']) &&
+        request.resource.data.uid == request.auth.uid &&
+        !exists(/databases/$(database)/documents/config/owner);
       allow read, update, delete: if false;
     }
+
     match /config/owner {
-      allow read: if me();
-      allow create: if me() && request.auth.token.firebase.sign_in_provider == 'password'
-        && request.resource.data.keys().hasOnly(['uid','email','pub'])
-        && request.resource.data.uid == request.auth.uid
-        && getAfter(/databases/$(database)/documents/bootstrap/$(SETUP())).data.uid == request.auth.uid
-        && !exists(/databases/$(database)/documents/config/owner);
+      allow read: if signedIn();
+      allow create: if signedIn() &&
+        request.auth.token.firebase.sign_in_provider == 'password' &&
+        request.resource.data.keys().hasOnly(['uid', 'email', 'pub']) &&
+        request.resource.data.uid == request.auth.uid &&
+        getAfter(/databases/$(database)/documents/bootstrap/$('Abq-nPGbf4r826PNmrZeIndqpJjEMPRS')).data.uid == request.auth.uid &&
+        !exists(/databases/$(database)/documents/config/owner);
       allow update, delete: if false;
     }
-    match /users/{u} {
-      allow read: if me() && request.auth.uid == u;
-      allow create, update: if me() && request.auth.uid == u && request.resource.data.keys().hasOnly(['lo','lm'])
-        && (!('lo' in request.resource.data) || request.resource.data.lo == request.time || request.resource.data.lo == resource.data.lo)
-        && (!('lm' in request.resource.data) || request.resource.data.lm == request.time || request.resource.data.lm == resource.data.lm);
+
+    match /users/{uid} {
+      allow read: if signedIn() && request.auth.uid == uid;
+      allow create, update: if signedIn() && request.auth.uid == uid &&
+        request.resource.data.keys().hasOnly(['lo', 'lm']);
       allow delete: if false;
     }
-    match /settings/{d} {
+
+    match /settings/{docId} {
       allow read: if true;
-      allow write: if isAdmin() && request.resource.data.keys().hasOnly(['prices','pay','support'])
-        && request.resource.data.prices.python is number && request.resource.data.prices.js is number && request.resource.data.prices.fin is number
-        && request.resource.data.support is string && request.resource.data.support.size() < 20;
+      allow write: if isAdmin() &&
+        request.resource.data.keys().hasOnly(['prices', 'pay', 'support']) &&
+        request.resource.data.prices.python is number &&
+        request.resource.data.prices.js is number &&
+        request.resource.data.prices.fin is number &&
+        request.resource.data.support is string &&
+        request.resource.data.support.size() < 20;
     }
-    match /orders/{id} {
-      allow create: if me() && fresh('lo', 60)
-        && request.resource.data.keys().hasOnly(['service','name','wa','phone','via','username','pw','price','shot','uid','status','ts'])
-        && request.resource.data.uid == request.auth.uid
-        && request.resource.data.status == 'جديد'
-        && request.resource.data.ts == request.time
-        && request.resource.data.service in ['python','js','fin']
-        && request.resource.data.via in ['wa','phone']
-        && request.resource.data.name is string && request.resource.data.name.size() >= 2 && request.resource.data.name.size() <= 60
-        && request.resource.data.wa.matches('^\\+?[0-9]{8,15}$') && request.resource.data.phone.matches('^\\+?[0-9]{8,15}$')
-        && request.resource.data.username.matches('^[A-Za-z0-9_.-]{3,30}$')
-        && request.resource.data.pw is string && request.resource.data.pw.size() < 700
-        && request.resource.data.shot is string && request.resource.data.shot.size() < 700000
-        && (!exists(/databases/$(database)/documents/settings/main)
-            || request.resource.data.price == get(/databases/$(database)/documents/settings/main).data.prices[request.resource.data.service]);
-      allow read: if isAdmin() || (me() && resource.data.uid == request.auth.uid);
-      allow update: if isAdmin() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
-        && request.resource.data.status in ['جديد','تم التفعيل','مرفوض'];
+
+    match /orders/{orderId} {
+      allow create: if signedIn() && orderRateOk() && orderOk();
+      allow read: if isAdmin() || (signedIn() && resource.data.uid == request.auth.uid);
+      allow update: if isAdmin() &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']) &&
+        statusOk();
       allow delete: if isAdmin();
-      match /msgs/{m} {
-        allow read: if isAdmin() || (me() && get(/databases/$(database)/documents/orders/$(id)).data.uid == request.auth.uid);
-        allow create: if request.resource.data.keys().hasOnly(['text','from','ts'])
-          && request.resource.data.text is string && request.resource.data.text.size() > 0 && request.resource.data.text.size() <= 900
-          && request.resource.data.ts == request.time && (
-            (isAdmin() && request.resource.data.from == 'a') ||
-            (me() && request.resource.data.from == 'c' && fresh('lm', 2)
-              && get(/databases/$(database)/documents/orders/$(id)).data.uid == request.auth.uid));
+
+      match /msgs/{msgId} {
+        allow read: if isAdmin() ||
+          (signedIn() && get(/databases/$(database)/documents/orders/$(orderId)).data.uid == request.auth.uid);
+        allow create: if request.resource.data.keys().hasOnly(['text', 'from', 'ts']) &&
+          request.resource.data.text is string &&
+          request.resource.data.text.size() > 0 &&
+          request.resource.data.text.size() <= 900 &&
+          request.resource.data.ts == request.time &&
+          ((isAdmin() && request.resource.data.from == 'a') ||
+           (signedIn() && request.resource.data.from == 'c' && msgRateOk() &&
+            get(/databases/$(database)/documents/orders/$(orderId)).data.uid == request.auth.uid));
         allow update, delete: if false;
       }
     }

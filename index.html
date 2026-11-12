@@ -59,6 +59,7 @@ const fb=initializeApp({apiKey:"AIzaSyDne0ICmp3JiaCBOPBJWeLYz67aFG5DwUc",authDom
 if(!SITE_KEY.startsWith("PUT_"))initializeAppCheck(fb,{provider:new ReCaptchaV3Provider(SITE_KEY),isTokenAutoRefreshEnabled:true});
 const auth=getAuth(fb),db=getFirestore(fb);
 const SV={python:{n:"Python",i:"🐍",d:"من الصفر للاحتراف بشرح مبسط وتطبيقات عملية."},js:{n:"JavaScript",i:"⚡",d:"ابنِ مواقع تفاعلية وتعلّم لغة الويب الأولى."},fin:{n:"الثقافة المالية",i:"💰",d:"إدارة الفلوس والادخار والاستثمار بذكاء."}};
+const ST={new:"جديد",ok:"تم التفعيل",no:"مرفوض"};
 const DEF={prices:{python:300,js:300,fin:200},pay:{vodafone:"01000000000",wepay:"01000000000",instapay:"name@instapay",qr:""},support:"201000000000"};
 let S=structuredClone(DEF),flt="all",firstS=true,me=null,OWN=null,PK=null,order={},shot="",OA={},unO=null,unC=null,adminMode=false,tab="o",idle=null,fails=+localStorage.f||0;
 const $=id=>document.getElementById(id),app=$("app");window.$=$;
@@ -103,7 +104,7 @@ window.send=async()=>{if(!shot){$("er").textContent="ارفع صورة التح�
  const ok=()=>{app.innerHTML=`<div class="card" style="text-align:center"><div style="font-size:3rem">✅</div><h2>تم استلام طلبك</h2><p class="sub">هنكلمك على ${order.via==="phone"?"الاتصال":"الواتساب"} بعد مراجعة التحويل. تابع طلبك من «طلباتي».</p><button onclick="go('my')">طلباتي والشات</button></div>`};
  if(order.hp)return ok();
  try{const b=writeBatch(db),o=order;b.set(doc(db,"users",me.uid),{lo:serverTimestamp()},{merge:true});
-  b.set(doc(collection(db,"orders")),{service:o.service,name:o.name,wa:o.wa,phone:o.phone,via:o.via,username:o.username,pw:await enc(OWN.pub,o.password),price:+S.prices[o.service],shot,uid:me.uid,status:"جديد",ts:serverTimestamp()});
+  b.set(doc(collection(db,"orders")),{service:o.service,name:o.name,wa:o.wa,phone:o.phone,via:o.via,username:o.username,pw:await enc(OWN.pub,o.password),price:+S.prices[o.service],shot,uid:me.uid,status:"new",ts:serverTimestamp()});
   await b.commit();ok()}catch(e){$("sb").disabled=false;$("er").textContent="تعذّر الإرسال (قد تحتاج تنتظر دقيقة بين الطلبات)."}};
 
 function chat(id){unC&&unC();$("chat").innerHTML=`<div class="card"><h3>الشات</h3><div id="ms" class="ms"></div><div style="display:flex;gap:8px"><input id="mt" maxlength="900" style="margin:0" placeholder="اكتب رسالة…" onkeydown="event.key==='Enter'&&sendM('${esc(id)}')"><button onclick="sendM('${esc(id)}')">إرسال</button></div></div>`;
@@ -115,15 +116,18 @@ window.sendM=async id=>{const t=$("mt").value.trim();if(!t)return;$("mt").value=
 
 function my(){app.innerHTML=`<h2>طلباتي</h2><div class="card" id="lst">جاري التحميل…</div><div id="chat"></div>`;
  unO=onSnapshot(query(collection(db,"orders"),where("uid","==",me.uid)),q=>{const a=q.docs.map(d=>({id:d.id,...d.data()})).sort((x,y)=>(y.ts?.toMillis?.()||9e15)-(x.ts?.toMillis?.()||9e15));
-  $("lst").innerHTML=a.map(o=>`<div class="row"><b>${esc(SV[o.service]?.n)}</b> <span class="tag">${esc(o.status)}</span> <button class="g" onclick="chat('${esc(o.id)}')">شات مع الدعم</button></div>`).join("")||"لا توجد طلبات على هذا الجهاز."},()=>{})}
+  $("lst").innerHTML=a.map(o=>`<div class="row"><b>${esc(SV[o.service]?.n)}</b> <span class="tag">${esc(ST[o.status]||"")}</span> <button class="g" onclick="chat('${esc(o.id)}')">شات مع الدعم</button></div>`).join("")||"لا توجد طلبات على هذا الجهاز."},()=>{})}
 
 // ---------------- المالك ----------------
 function authForm(first){app.innerHTML=`<div class="card"><h2>${first?"إنشاء حساب المالك":"دخول المالك"}</h2>${first?'<p class="sub">أول حساب يُسجَّل بكود التفعيل يصبح المالك. سيُنزَّل ملف مفتاح فك التشفير — احتفظ به في مكان آمن.</p>':""}<label>البريد</label><input id="em" type="email" dir="ltr" autocomplete="username"><label>كلمة المرور (١٢ حرفًا فأكثر)</label><input id="ps" type="password" autocomplete="${first?"new-password":"current-password"}">${first?'<label>كود التفعيل (من ملف القواعد)</label><input id="sc" type="password" dir="ltr">':""}<p class="err" id="er"></p><button onclick="${first?"reg()":"login()"}">${first?"إنشاء الحساب":"دخول"}</button></div>`}
 window.reg=async()=>{const e=$("em").value.trim(),p=$("ps").value,c=$("sc").value.trim();if(p.length<12||!c){$("er").textContent="كلمة المرور ١٢ حرفًا والكود مطلوب";return}
- try{const k=await genKeys(),u=(await createUserWithEmailAndPassword(auth,e,p)).user,b=writeBatch(db);
+ $("er").textContent="جاري الإنشاء…";let step="مفاتيح التشفير";
+ try{const k=await genKeys();let u;step="إنشاء الحساب";
+  try{u=(await createUserWithEmailAndPassword(auth,e,p)).user}catch(x){if(x.code==="auth/email-already-in-use")u=(await signInWithEmailAndPassword(auth,e,p)).user;else throw x}
+  step="حفظ المالك في قاعدة البيانات";const b=writeBatch(db);
   b.set(doc(db,"bootstrap",c),{uid:u.uid});b.set(doc(db,"config","owner"),{uid:u.uid,email:e,pub:k.pub});await b.commit();
   const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(k.priv)],{type:"application/json"}));a.download="abqari-owner-key.json";a.click();
-  OWN={uid:u.uid,email:e,pub:k.pub};PK=k.priv;route()}catch(x){$("er").textContent="تعذّر الإنشاء (الكود غير صحيح أو المالك موجود بالفعل)"}};
+  OWN={uid:u.uid,email:e,pub:k.pub};PK=k.priv;route()}catch(x){$("er").textContent="فشل في خطوة ("+step+"): "+(x.code||x.message||"")}};
 window.login=async()=>{if(fails>=5&&Date.now()<+localStorage.lk){$("er").textContent="محاولات كثيرة، انتظر دقيقة";return}
  try{await setPersistence(auth,browserSessionPersistence);await signInWithEmailAndPassword(auth,$("em").value.trim(),$("ps").value);fails=localStorage.f=0}
  catch(e){localStorage.f=++fails;if(fails>=5)localStorage.lk=Date.now()+6e4;$("er").textContent="بيانات الدخول غير صحيحة"}};
@@ -138,16 +142,16 @@ function admin(){
 function panel(){
  const f=(id,l,v)=>`<label>${l}</label><input id="${id}" value="${esc(v)}">`;
  app.innerHTML=`<div class="tabs"><button class="${tab==="o"?"":"g"}" onclick="tab='o';route()">الطلبات</button><button class="${tab==="s"?"":"g"}" onclick="tab='s';route()">الإعدادات</button><button class="g" onclick="logout()">خروج</button></div>
- ${tab==="o"?`<div class="card"><label>🔑 ملف مفتاح فك التشفير (لإظهار كلمات المرور)</label><input type="file" accept=".json" onchange="impK(this)"></div><div id="stats" class="grid st"></div><div class="tabs">${["all","جديد","تم التفعيل","مرفوض"].map(x=>`<button class="${flt===x?"":"g"}" onclick="setF('${x}')">${x==="all"?"الكل":x}</button>`).join("")}</div><div class="card" id="lst">جاري التحميل…</div><div id="chat"></div>`
+ ${tab==="o"?`<div class="card"><label>🔑 ملف مفتاح فك التشفير (لإظهار كلمات المرور)</label><input type="file" accept=".json" onchange="impK(this)"></div><div id="stats" class="grid st"></div><div class="tabs">${["all","new","ok","no"].map(x=>`<button class="${flt===x?"":"g"}" onclick="setF('${x}')">${x==="all"?"الكل":ST[x]}</button>`).join("")}</div><div class="card" id="lst">جاري التحميل…</div><div id="chat"></div>`
  :`<div class="card">${f("s_py","سعر Python",S.prices.python)}${f("s_js","سعر JavaScript",S.prices.js)}${f("s_fin","سعر الثقافة المالية",S.prices.fin)}${f("p_v","فودافون كاش",S.pay.vodafone)}${f("p_w","وي باي",S.pay.wepay)}${f("p_i","انستا باي",S.pay.instapay)}${f("p_q","رابط صورة QR (https)",S.pay.qr)}${f("s_sup","واتساب الدعم (بكود الدولة)",S.support)}<button onclick="saveS()">حفظ</button> <span id="sv" style="color:var(--ok)"></span></div>`}`;
  if(tab==="o")unO=onSnapshot(query(collection(db,"orders"),orderBy("ts","desc")),q=>{OA={};q.docs.forEach(d=>OA[d.id]={id:d.id,...d.data()});const L=Object.values(OA);stats(L);
   if(!firstS)q.docChanges().forEach(c=>c.type==="added"&&!c.doc.metadata.hasPendingWrites&&(toast("🔔 طلب جديد!"),beep()));firstS=false;
-  $("lst").innerHTML=L.filter(o=>flt==="all"||o.status===flt).map(o=>{const id=esc(o.id);return`<div class="row"><b>${esc(SV[o.service]?.n)}</b> <span class="tag">${esc(o.status)}</span> <span class="tag">يفضّل: ${o.via==="phone"?"الاتصال":"الواتساب"}</span>
+  $("lst").innerHTML=L.filter(o=>flt==="all"||o.status===flt).map(o=>{const id=esc(o.id);return`<div class="row"><b>${esc(SV[o.service]?.n)}</b> <span class="tag">${esc(ST[o.status]||"")}</span> <span class="tag">يفضّل: ${o.via==="phone"?"الاتصال":"الواتساب"}</span>
   <div>👤 ${esc(o.name)} | 📱 <span dir="ltr">${esc(o.wa)}</span> | ☎️ <span dir="ltr">${esc(o.phone)}</span></div>
   <div>🆔 <span dir="ltr">${esc(o.username)}</span> 🔑 <button class="g" onclick="showPw('${id}',this)">إظهار الباسورد</button></div>${okImg(o.shot)?`<img src="${o.shot}" alt="تحويل" onclick="zoom(this)">`:""}
   ${o.via==="phone"?`<a class="btn" href="tel:${esc(o.phone)}">📞 اتصال</a>`:`<a class="btn" href="https://wa.me/${digits(o.wa)}?text=${encodeURIComponent("أهلاً "+o.name+"، معك العبقري بخصوص طلبك. ")}">💬 رسالة واتساب</a>`}
-  <button onclick="chat('${id}')">شات</button> <button class="g" onclick="st('${id}','تم التفعيل')">تفعيل</button> <button class="g" onclick="st('${id}','مرفوض')">رفض</button> <button class="g" onclick="rm('${id}')">حذف</button></div>`}).join("")||"لا توجد طلبات."},()=>{$("lst").textContent="غير مصرح."})}
-const stats=L=>{const ok=L.filter(o=>o.status==="تم التفعيل");$("stats").innerHTML=[["إجمالي الطلبات",L.length],["جديد",L.filter(o=>o.status==="جديد").length],["تم التفعيل",ok.length],["الإيراد (ج.م)",ok.reduce((t,o)=>t+(+o.price||0),0)]].map(([l,v])=>`<div class="card"><div class="num" style="font-size:2rem">${v}</div><span class="sub">${l}</span></div>`).join("")};
+  <button onclick="chat('${id}')">شات</button> <button class="g" onclick="st('${id}','ok')">تفعيل</button> <button class="g" onclick="st('${id}','no')">رفض</button> <button class="g" onclick="rm('${id}')">حذف</button></div>`}).join("")||"لا توجد طلبات."},()=>{$("lst").textContent="غير مصرح."})}
+const stats=L=>{const ok=L.filter(o=>o.status==="ok");$("stats").innerHTML=[["إجمالي الطلبات",L.length],["جديد",L.filter(o=>o.status==="new").length],["تم التفعيل",ok.length],["الإيراد (ج.م)",ok.reduce((t,o)=>t+(+o.price||0),0)]].map(([l,v])=>`<div class="card"><div class="num" style="font-size:2rem">${v}</div><span class="sub">${l}</span></div>`).join("")};
 const beep=()=>{try{const c=new AudioContext(),o=c.createOscillator();o.connect(c.destination);o.frequency.value=880;o.start();o.stop(c.currentTime+.2)}catch(e){}};
 window.setF=v=>{flt=v;route()};window.st=(id,s)=>updateDoc(doc(db,"orders",id),{status:s});window.rm=id=>confirm("حذف الطلب؟")&&deleteDoc(doc(db,"orders",id));
 window.saveS=async()=>{const v=i=>$(i).value.trim(),n=i=>Math.max(0,Math.min(1e5,+v(i)||0));
