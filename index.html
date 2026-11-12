@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://apis.google.com https://www.google.com/recaptcha/; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src https://*.googleapis.com https://*.firebaseio.com wss://*.firebaseio.com https://www.google.com; frame-src https://www.google.com https://*.firebaseapp.com; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<title>العبقري</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f3f6fc;--card:#fff;--tx:#0f1b33;--mut:#5d6b88;--pri:#0a74ff;--bd:#e0e6f2;--ok:#16a34a}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0a1020;--card:#141c33;--tx:#eef1fa;--mut:#9aa6c4;--bd:#25304f}}
+:root[data-theme="dark"]{--bg:#0a1020;--card:#141c33;--tx:#eef1fa;--mut:#9aa6c4;--bd:#25304f}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font-family:Cairo,system-ui,sans-serif;line-height:1.65;padding-bottom:90px}
+.w{max-width:980px;margin:auto;padding:16px}.sub{color:var(--mut)}.note{font-size:.85rem;color:var(--mut)}.err{color:#dc2626}
+.hero{margin:14px 0 6px;border-radius:32px;padding:42px 22px;text-align:center;color:#fff;background:linear-gradient(120deg,#0a74ff,#6d5dfc,#06b6d4,#0a74ff);background-size:300% 300%;animation:flow 12s ease infinite}
+@keyframes flow{50%{background-position:100% 50%}}@media(prefers-reduced-motion:reduce){.hero{animation:none}}
+.hero h1{margin:0 0 6px;font-size:2.4rem;font-weight:800}.hero p{margin:0 auto 16px;max-width:520px;opacity:.92}
+.chips{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}.chips span{background:rgba(255,255,255,.18);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.35);border-radius:30px;padding:4px 14px;font-size:.88rem}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));margin-top:18px}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:26px;padding:22px;margin-bottom:14px;box-shadow:0 10px 30px rgba(15,27,51,.06)}
+button,.btn{font:inherit;cursor:pointer;border:0;border-radius:14px;padding:10px 18px;background:var(--pri);color:#fff;font-weight:600;text-decoration:none;display:inline-block}
+button:disabled{opacity:.5}button.g{background:transparent;color:var(--tx);border:1px solid var(--bd)}
+input{font:inherit;width:100%;padding:11px;margin:4px 0 12px;border-radius:12px;border:1px solid var(--bd);background:var(--bg);color:var(--tx)}
+input:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid var(--pri);outline-offset:2px}label{font-size:.9rem;color:var(--mut)}
+.pay{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 14px;border:1px dashed var(--bd);border-radius:14px;margin:8px 0}.pay b{direction:ltr;user-select:all}
+nav{position:sticky;top:8px;z-index:20;margin:8px 12px 0}
+.bar{display:flex;align-items:center;justify-content:space-between;background:rgba(10,116,255,.92);backdrop-filter:blur(10px);color:#fff;border-radius:40px;padding:10px 18px;box-shadow:0 8px 24px rgba(10,116,255,.35)}
+.bar b{font-size:1.4rem;font-weight:800;cursor:pointer}.ib{background:transparent;border:0;color:#fff;font-size:1.4rem;padding:4px 8px;line-height:1}
+.ib.s{background:#d9dce3;color:#14213d;border-radius:50%;width:42px;height:42px;font-size:1.1rem;padding:0}
+.dd{display:none;background:var(--card);border:1px solid var(--bd);border-radius:20px;margin-top:8px;padding:10px 16px}.dd.on{display:block}
+.dd a{display:block;padding:8px 0;color:var(--tx);text-decoration:none;font-weight:600}.dd input{margin:0 0 6px}
+.c0{background:#b9e8ff}.c1{background:#c8f3c4}.c2{background:#8ef6ff}.cp{color:#0f1b33;transition:transform .2s}.cp:hover{transform:translateY(-4px)}.cp .sub{color:#2c3a5c}.cp button{background:#0f1b33}
+.num{font-size:3rem;font-weight:800;line-height:1}.price{font-size:1.6rem;font-weight:800;color:#0a3d91}
+.fab{position:fixed;left:16px;bottom:16px;z-index:30;background:#1d6ff2;color:#fff;border-radius:30px;padding:14px 22px;font-weight:700;text-decoration:none;box-shadow:0 8px 22px rgba(29,111,242,.45)}
+.row{border-bottom:1px solid var(--bd);padding:12px 0}.row img{max-width:180px;border-radius:10px;display:block;margin:8px 0;cursor:zoom-in}
+.tag{background:var(--bd);border-radius:20px;padding:2px 10px;font-size:.8rem;display:inline-block}.tabs{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.ms{height:260px;overflow:auto;display:flex;flex-direction:column;gap:6px;margin-bottom:8px}.m{background:var(--bd);padding:8px 12px;border-radius:16px;max-width:80%;align-self:flex-start}.m.me{background:var(--pri);color:#fff;align-self:flex-end}
+.toast{position:fixed;top:80px;left:50%;transform:translateX(-50%);background:#0f1b33;color:#fff;padding:10px 20px;border-radius:30px;z-index:50}
+.seg{display:flex;gap:10px;margin:6px 0 12px}.seg label{flex:1;display:flex;align-items:center;gap:6px;padding:10px;border:1px solid var(--bd);border-radius:14px;color:var(--tx)}.seg input{width:auto;margin:0}
+.st{grid-template-columns:repeat(auto-fit,minmax(130px,1fr))}.st .card{margin:0;text-align:center}
+.lb{position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:60}.lb img{max-width:94%;max-height:94%;border-radius:12px}
+</style>
+</head>
+<body>
+<nav><div class="bar"><button class="ib" onclick="$('dd').classList.toggle('on')" aria-label="القائمة">☰</button><b onclick="go('')">العبقري 🧠</b>
+<span><button class="ib s" onclick="$('dd').classList.add('on');$('sq').focus()" aria-label="بحث">🔍</button> <button class="ib" id="tg" onclick="tg()" aria-label="الوضع">☀️</button></span></div>
+<div class="dd" id="dd"><input id="sq" placeholder="ابحث عن خدمة…" oninput="srch(this.value)"><a href="#" onclick="return go('')">الرئيسية</a><a href="#" onclick="return go('my')">طلباتي والشات</a><a id="sup" href="#">الدعم الفني</a></div></nav>
+<a class="fab" id="fab" href="#">💬 تواصل مع الدعم</a>
+<div class="w" id="app"></div>
+<script type="module">
+import {initializeApp} from "https://www.gstatic.com/firebasejs/13.3.0/firebase-app.js";
+import {initializeAppCheck,ReCaptchaV3Provider} from "https://www.gstatic.com/firebasejs/13.3.0/firebase-app-check.js";
+import {getAuth,signInAnonymously,onAuthStateChanged,signInWithEmailAndPassword,createUserWithEmailAndPassword,setPersistence,browserSessionPersistence,signOut} from "https://www.gstatic.com/firebasejs/13.3.0/firebase-auth.js";
+import {getFirestore,doc,getDoc,setDoc,addDoc,updateDoc,deleteDoc,collection,query,where,orderBy,onSnapshot,writeBatch,serverTimestamp} from "https://www.gstatic.com/firebasejs/13.3.0/firebase-firestore.js";
+if(top!==self)top.location=self.location;
+const SITE_KEY="PUT_RECAPTCHA_V3_SITE_KEY";
+const fb=initializeApp({apiKey:"AIzaSyDne0ICmp3JiaCBOPBJWeLYz67aFG5DwUc",authDomain:"abkary-132ab.firebaseapp.com",projectId:"abkary-132ab",storageBucket:"abkary-132ab.firebasestorage.app",messagingSenderId:"592479281336",appId:"1:592479281336:web:63ecb7ede768eaa951944d"});
+if(!SITE_KEY.startsWith("PUT_"))initializeAppCheck(fb,{provider:new ReCaptchaV3Provider(SITE_KEY),isTokenAutoRefreshEnabled:true});
+const auth=getAuth(fb),db=getFirestore(fb);
+const SV={python:{n:"Python",i:"🐍",d:"من الصفر للاحتراف بشرح مبسط وتطبيقات عملية."},js:{n:"JavaScript",i:"⚡",d:"ابنِ مواقع تفاعلية وتعلّم لغة الويب الأولى."},fin:{n:"الثقافة المالية",i:"💰",d:"إدارة الفلوس والادخار والاستثمار بذكاء."}};
+const DEF={prices:{python:300,js:300,fin:200},pay:{vodafone:"01000000000",wepay:"01000000000",instapay:"name@instapay",qr:""},support:"201000000000"};
+let S=structuredClone(DEF),flt="all",firstS=true,me=null,OWN=null,PK=null,order={},shot="",OA={},unO=null,unC=null,adminMode=false,tab="o",idle=null,fails=+localStorage.f||0;
+const $=id=>document.getElementById(id),app=$("app");
+const esc=s=>String(s??"").replace(/[&<>"'`]/g,c=>"&#"+c.charCodeAt(0)+";");
+const okImg=s=>/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(s||""),okUrl=u=>/^(https:\/\/|data:image\/(png|jpeg);base64,)/.test(u||"");
+const digits=s=>String(s||"").replace(/\D/g,"");
+// ---- تشفير كلمات المرور (RSA-OAEP): المفتاح الخاص مع المالك فقط ----
+const b64=b=>btoa(String.fromCharCode(...new Uint8Array(b))),ub=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0)),A={name:"RSA-OAEP",hash:"SHA-256"};
+const genKeys=async()=>{const k=await crypto.subtle.generateKey({...A,modulusLength:2048,publicExponent:new Uint8Array([1,0,1])},true,["encrypt","decrypt"]);return{pub:await crypto.subtle.exportKey("jwk",k.publicKey),priv:await crypto.subtle.exportKey("jwk",k.privateKey)}};
+const enc=async(j,t)=>b64(await crypto.subtle.encrypt(A,await crypto.subtle.importKey("jwk",j,A,false,["encrypt"]),new TextEncoder().encode(t)));
+const dec=async(j,c)=>new TextDecoder().decode(await crypto.subtle.decrypt(A,await crypto.subtle.importKey("jwk",j,A,false,["decrypt"]),ub(c)));
+
+const route=()=>{firstS=true;unO&&unO();unC&&unC();unO=unC=null;adminMode=location.hash==="#admin";const h=location.hash;adminMode?admin():h==="#my"?my():home();$("fab").href=$("sup").href="https://wa.me/"+digits(S.support)};
+window.go=h=>{$("dd").classList.remove("on");if(location.hash==="#"+h)route();else location.hash=h;return false};
+addEventListener("hashchange",route);
+window.toast=m=>{const t=document.createElement("div");t.className="toast";t.textContent=m;document.body.append(t);setTimeout(()=>t.remove(),2600)};
+window.cp=t=>navigator.clipboard.writeText(t).then(()=>toast("تم النسخ ✓"));
+window.zoom=i=>{const l=document.createElement("div");l.className="lb";const im=document.createElement("img");im.src=i.src;l.append(im);l.onclick=()=>l.remove();document.body.append(l)};
+window.srch=v=>document.querySelectorAll("[data-n]").forEach(c=>c.style.display=c.dataset.n.toLowerCase().includes(v.trim().toLowerCase())?"":"none");
+window.tg=()=>{const r=document.documentElement,d=matchMedia("(prefers-color-scheme: dark)").matches,c=r.dataset.theme||(d?"dark":"light");r.dataset.theme=c==="dark"?"light":"dark";$("tg").textContent=c==="dark"?"☀️":"🌙"};
+
+function home(){
+ app.innerHTML=`<section class="hero"><h1>ابدأ مع العبقري</h1><p>دورات مركّزة في البرمجة والثقافة المالية، وتدعمك خطوة بخطوة.</p><div class="chips"><span>🔒 دفع موثّق</span><span>💬 دعم مباشر</span><span>⚡ تفعيل سريع</span></div></section>
+ <div class="grid">${Object.keys(SV).map((k,i)=>`<div class="card cp c${i}" data-n="${SV[k].n}"><div class="num">${i+1}</div><div style="font-size:2rem">${SV[k].i}</div><h3>${SV[k].n}</h3><p class="sub">${SV[k].d}</p><div class="price">${+S.prices[k]||0} ج.م</div><br><button onclick="buy('${k}')">اشترِ الآن</button></div>`).join("")}</div>`}
+
+window.buy=k=>{order={service:k};
+ app.innerHTML=`<div class="card"><h2>${SV[k].i} طلب ${SV[k].n} — ${+S.prices[k]} ج.م</h2>
+ <label>الاسم</label><input id="nm" maxlength="60"><label>رقم الواتساب</label><input id="wa" type="tel" dir="ltr" maxlength="16"><label>رقم الاتصال</label><input id="ph" type="tel" dir="ltr" maxlength="16">
+ <label>تحب نكلمك على أنهي رقم؟</label><div class="seg"><label><input type="radio" name="cv" value="wa" checked> واتساب</label><label><input type="radio" name="cv" value="phone"> اتصال</label></div>
+ <label>اسم المستخدم (حروف إنجليزية وأرقام)</label><input id="un" dir="ltr" maxlength="30" autocomplete="off"><label>كلمة المرور</label><input id="pw" maxlength="64" autocomplete="off">
+ <input id="hp" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px" aria-hidden="true">
+ <p class="note">كلمة المرور بتتشفّر في جهازك قبل الإرسال ولا يقرأها إلا المالك. لا تستخدم باسورد حسابات أخرى.</p><p class="err" id="er"></p>
+ <button onclick="toPay()">التالي: الدفع</button> <button class="g" onclick="go('')">رجوع</button></div>`};
+window.toPay=()=>{const g=i=>$(i).value.trim();Object.assign(order,{name:g("nm"),wa:g("wa").replace(/[\s-]/g,""),phone:g("ph").replace(/[\s-]/g,""),via:(document.querySelector("input[name=cv]:checked")||{}).value||"wa",username:g("un"),password:g("pw"),hp:g("hp")});
+ const o=order,bad=o.name.length<2?"اكتب الاسم":!/^\+?[0-9]{8,15}$/.test(o.wa)||!/^\+?[0-9]{8,15}$/.test(o.phone)?"أرقام الهاتف غير صحيحة":!/^[A-Za-z0-9_.-]{3,30}$/.test(o.username)?"اسم المستخدم: ٣-٣٠ حرف إنجليزي/رقم":o.password.length<6?"كلمة المرور ٦ حروف على الأقل":!OWN?"الموقع غير جاهز بعد، حاول لاحقًا":"";
+ if(bad){$("er").textContent=bad;return}
+ shot="";const p=S.pay,r=(l,v)=>v?`<div class="pay"><span>${l}</span><b>${esc(v)}</b><button class="g" onclick="cp('${esc(v)}')">نسخ</button></div>`:"";
+ app.innerHTML=`<div class="card"><h2>الدفع — ${+S.prices[o.service]} ج.م</h2><p class="sub">حوّل المبلغ بإحدى الطرق ثم ارفع صورة التحويل.</p>${r("فودافون كاش",p.vodafone)}${r("وي باي",p.wepay)}${r("انستا باي",p.instapay)}${okUrl(p.qr)?`<p>أو امسح QR:</p><img src="${esc(p.qr)}" alt="QR" style="max-width:200px;border-radius:12px">`:""}
+ <label>صورة التحويل (سكرين شوت)</label><input type="file" accept="image/*" onchange="pick(this)"><p class="err" id="er"></p><button id="sb" onclick="send()">إرسال الطلب</button> <button class="g" onclick="buy('${o.service}')">رجوع</button></div>`};
+window.pick=f=>{const file=f.files[0];if(!file||!file.type.startsWith("image/"))return;const im=new Image();im.onload=()=>{const c=document.createElement("canvas"),s=Math.min(1,800/im.width);c.width=im.width*s;c.height=im.height*s;c.getContext("2d").drawImage(im,0,0,c.width,c.height);shot=c.toDataURL("image/jpeg",.6)};im.src=URL.createObjectURL(file)};
+window.send=async()=>{if(!shot){$("er").textContent="ارفع صورة التحويل أولاً";return}if(!me)return;$("sb").disabled=true;
+ const ok=()=>{app.innerHTML=`<div class="card" style="text-align:center"><div style="font-size:3rem">✅</div><h2>تم استلام طلبك</h2><p class="sub">هنكلمك على ${order.via==="phone"?"الاتصال":"الواتساب"} بعد مراجعة التحويل. تابع طلبك من «طلباتي».</p><button onclick="go('my')">طلباتي والشات</button></div>`};
+ if(order.hp)return ok();
+ try{const b=writeBatch(db),o=order;b.set(doc(db,"users",me.uid),{lo:serverTimestamp()},{merge:true});
+  b.set(doc(collection(db,"orders")),{service:o.service,name:o.name,wa:o.wa,phone:o.phone,via:o.via,username:o.username,pw:await enc(OWN.pub,o.password),price:+S.prices[o.service],shot,uid:me.uid,status:"جديد",ts:serverTimestamp()});
+  await b.commit();ok()}catch(e){$("sb").disabled=false;$("er").textContent="تعذّر الإرسال (قد تحتاج تنتظر دقيقة بين الطلبات)."}};
+
+function chat(id){unC&&unC();$("chat").innerHTML=`<div class="card"><h3>الشات</h3><div id="ms" class="ms"></div><div style="display:flex;gap:8px"><input id="mt" maxlength="900" style="margin:0" placeholder="اكتب رسالة…" onkeydown="event.key==='Enter'&&sendM('${esc(id)}')"><button onclick="sendM('${esc(id)}')">إرسال</button></div></div>`;
+ unC=onSnapshot(query(collection(db,"orders",id,"msgs"),orderBy("ts")),q=>{const w=adminMode?"a":"c";$("ms").innerHTML=q.docs.map(d=>{const m=d.data();return`<div class="m ${m.from===w?"me":""}">${esc(m.text)}</div>`}).join("");$("ms").scrollTop=1e9},()=>{})}
+window.chat=chat;
+window.sendM=async id=>{const t=$("mt").value.trim();if(!t)return;$("mt").value="";const b=writeBatch(db);
+ if(!adminMode)b.set(doc(db,"users",me.uid),{lm:serverTimestamp()},{merge:true});
+ b.set(doc(collection(db,"orders",id,"msgs")),{text:t.slice(0,900),from:adminMode?"a":"c",ts:serverTimestamp()});try{await b.commit()}catch(e){toast("انتظر ثانيتين بين الرسائل")}};
+
+function my(){app.innerHTML=`<h2>طلباتي</h2><div class="card" id="lst">جاري التحميل…</div><div id="chat"></div>`;
+ unO=onSnapshot(query(collection(db,"orders"),where("uid","==",me.uid)),q=>{const a=q.docs.map(d=>({id:d.id,...d.data()})).sort((x,y)=>(y.ts?.toMillis?.()||9e15)-(x.ts?.toMillis?.()||9e15));
+  $("lst").innerHTML=a.map(o=>`<div class="row"><b>${esc(SV[o.service]?.n)}</b> <span class="tag">${esc(o.status)}</span> <button class="g" onclick="chat('${esc(o.id)}')">شات مع الدعم</button></div>`).join("")||"لا توجد طلبات على هذا الجهاز."},()=>{})}
+
+// ---------------- المالك ----------------
+function authForm(first){app.innerHTML=`<div class="card"><h2>${first?"إنشاء حساب المالك":"دخول المالك"}</h2>${first?'<p class="sub">أول حساب يُسجَّل بكود التفعيل يصبح المالك. سيُنزَّل ملف مفتاح فك التشفير — احتفظ به في مكان آمن.</p>':""}<label>البريد</label><input id="em" type="email" dir="ltr" autocomplete="username"><label>كلمة المرور (١٢ حرفًا فأكثر)</label><input id="ps" type="password" autocomplete="${first?"new-password":"current-password"}">${first?'<label>كود التفعيل (من ملف القواعد)</label><input id="sc" type="password" dir="ltr">':""}<p class="err" id="er"></p><button onclick="${first?"reg()":"login()"}">${first?"إنشاء الحساب":"دخول"}</button></div>`}
+window.reg=async()=>{const e=$("em").value.trim(),p=$("ps").value,c=$("sc").value.trim();if(p.length<12||!c){$("er").textContent="كلمة المرور ١٢ حرفًا والكود مطلوب";return}
+ try{const k=await genKeys(),u=(await createUserWithEmailAndPassword(auth,e,p)).user,b=writeBatch(db);
+  b.set(doc(db,"bootstrap",c),{uid:u.uid});b.set(doc(db,"config","owner"),{uid:u.uid,email:e,pub:k.pub});await b.commit();
+  const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(k.priv)],{type:"application/json"}));a.download="abqari-owner-key.json";a.click();
+  OWN={uid:u.uid,email:e,pub:k.pub};PK=k.priv;route()}catch(x){$("er").textContent="تعذّر الإنشاء (الكود غير صحيح أو المالك موجود بالفعل)"}};
+window.login=async()=>{if(fails>=5&&Date.now()<+localStorage.lk){$("er").textContent="محاولات كثيرة، انتظر دقيقة";return}
+ try{await setPersistence(auth,browserSessionPersistence);await signInWithEmailAndPassword(auth,$("em").value.trim(),$("ps").value);fails=localStorage.f=0}
+ catch(e){localStorage.f=++fails;if(fails>=5)localStorage.lk=Date.now()+6e4;$("er").textContent="بيانات الدخول غير صحيحة"}};
+window.logout=async()=>{PK=null;await signOut(auth);location.hash=""};
+window.impK=f=>{const r=new FileReader();r.onload=async()=>{try{PK=JSON.parse(r.result);await dec(PK,await enc(OWN.pub,"t"));toast("تم تحميل المفتاح ✓")}catch(e){PK=null;toast("المفتاح غير صالح")}};r.readAsText(f.files[0])};
+window.showPw=async(id,b)=>{if(!PK)return toast("استورد ملف المفتاح أولًا");try{b.textContent=await dec(PK,OA[id].pw)}catch(e){toast("تعذّر فك التشفير")}};
+function admin(){
+ if(!OWN)return authForm(true);if(!me||me.isAnonymous)return authForm(false);
+ if(OWN.uid!==me.uid){app.innerHTML=`<div class="card"><h3>🔒 هذا الحساب ليس المالك</h3><button onclick="logout()">خروج</button></div>`;return}
+ clearTimeout(idle);idle=setTimeout(logout,9e5);panel()}
+["click","keydown"].forEach(e=>addEventListener(e,()=>{if(adminMode&&idle){clearTimeout(idle);idle=setTimeout(logout,9e5)}}));
+function panel(){
+ const f=(id,l,v)=>`<label>${l}</label><input id="${id}" value="${esc(v)}">`;
+ app.innerHTML=`<div class="tabs"><button class="${tab==="o"?"":"g"}" onclick="tab='o';route()">الطلبات</button><button class="${tab==="s"?"":"g"}" onclick="tab='s';route()">الإعدادات</button><button class="g" onclick="logout()">خروج</button></div>
+ ${tab==="o"?`<div class="card"><label>🔑 ملف مفتاح فك التشفير (لإظهار كلمات المرور)</label><input type="file" accept=".json" onchange="impK(this)"></div><div id="stats" class="grid st"></div><div class="tabs">${["all","جديد","تم التفعيل","مرفوض"].map(x=>`<button class="${flt===x?"":"g"}" onclick="setF('${x}')">${x==="all"?"الكل":x}</button>`).join("")}</div><div class="card" id="lst">جاري التحميل…</div><div id="chat"></div>`
+ :`<div class="card">${f("s_py","سعر Python",S.prices.python)}${f("s_js","سعر JavaScript",S.prices.js)}${f("s_fin","سعر الثقافة المالية",S.prices.fin)}${f("p_v","فودافون كاش",S.pay.vodafone)}${f("p_w","وي باي",S.pay.wepay)}${f("p_i","انستا باي",S.pay.instapay)}${f("p_q","رابط صورة QR (https)",S.pay.qr)}${f("s_sup","واتساب الدعم (بكود الدولة)",S.support)}<button onclick="saveS()">حفظ</button> <span id="sv" style="color:var(--ok)"></span></div>`}`;
+ if(tab==="o")unO=onSnapshot(query(collection(db,"orders"),orderBy("ts","desc")),q=>{OA={};q.docs.forEach(d=>OA[d.id]={id:d.id,...d.data()});const L=Object.values(OA);stats(L);
+  if(!firstS)q.docChanges().forEach(c=>c.type==="added"&&!c.doc.metadata.hasPendingWrites&&(toast("🔔 طلب جديد!"),beep()));firstS=false;
+  $("lst").innerHTML=L.filter(o=>flt==="all"||o.status===flt).map(o=>{const id=esc(o.id);return`<div class="row"><b>${esc(SV[o.service]?.n)}</b> <span class="tag">${esc(o.status)}</span> <span class="tag">يفضّل: ${o.via==="phone"?"الاتصال":"الواتساب"}</span>
+  <div>👤 ${esc(o.name)} | 📱 <span dir="ltr">${esc(o.wa)}</span> | ☎️ <span dir="ltr">${esc(o.phone)}</span></div>
+  <div>🆔 <span dir="ltr">${esc(o.username)}</span> 🔑 <button class="g" onclick="showPw('${id}',this)">إظهار الباسورد</button></div>${okImg(o.shot)?`<img src="${o.shot}" alt="تحويل" onclick="zoom(this)">`:""}
+  ${o.via==="phone"?`<a class="btn" href="tel:${esc(o.phone)}">📞 اتصال</a>`:`<a class="btn" href="https://wa.me/${digits(o.wa)}?text=${encodeURIComponent("أهلاً "+o.name+"، معك العبقري بخصوص طلبك. ")}">💬 رسالة واتساب</a>`}
+  <button onclick="chat('${id}')">شات</button> <button class="g" onclick="st('${id}','تم التفعيل')">تفعيل</button> <button class="g" onclick="st('${id}','مرفوض')">رفض</button> <button class="g" onclick="rm('${id}')">حذف</button></div>`}).join("")||"لا توجد طلبات."},()=>{$("lst").textContent="غير مصرح."})}
+const stats=L=>{const ok=L.filter(o=>o.status==="تم التفعيل");$("stats").innerHTML=[["إجمالي الطلبات",L.length],["جديد",L.filter(o=>o.status==="جديد").length],["تم التفعيل",ok.length],["الإيراد (ج.م)",ok.reduce((t,o)=>t+(+o.price||0),0)]].map(([l,v])=>`<div class="card"><div class="num" style="font-size:2rem">${v}</div><span class="sub">${l}</span></div>`).join("")};
+const beep=()=>{try{const c=new AudioContext(),o=c.createOscillator();o.connect(c.destination);o.frequency.value=880;o.start();o.stop(c.currentTime+.2)}catch(e){}};
+window.setF=v=>{flt=v;route()};window.st=(id,s)=>updateDoc(doc(db,"orders",id),{status:s});window.rm=id=>confirm("حذف الطلب؟")&&deleteDoc(doc(db,"orders",id));
+window.saveS=async()=>{const v=i=>$(i).value.trim(),n=i=>Math.max(0,Math.min(1e5,+v(i)||0));
+ await setDoc(doc(db,"settings","main"),{prices:{python:n("s_py"),js:n("s_js"),fin:n("s_fin")},pay:{vodafone:v("p_v"),wepay:v("p_w"),instapay:v("p_i"),qr:okUrl(v("p_q"))?v("p_q"):""},support:digits(v("s_sup")).slice(0,15)});$("sv").textContent="تم الحفظ ✓"};
+window.route=route;Object.defineProperty(window,"tab",{get:()=>tab,set:v=>tab=v});
+
+onSnapshot(doc(db,"settings","main"),s=>{if(s.exists()){S={...DEF,...s.data()};if(!adminMode||tab!=="s")route()}},()=>{});
+let first=true;onAuthStateChanged(auth,async u=>{me=u;if(!u){signInAnonymously(auth).catch(()=>{});return}
+ try{const s=await getDoc(doc(db,"config","owner"));OWN=s.exists()?s.data():OWN}catch(e){}route()});
+route();
+</script>
+</body>
+</html>

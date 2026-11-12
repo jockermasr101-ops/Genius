@@ -1,0 +1,76 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // غيّر هذا الكود لكود سري طويل (٢٠ حرفًا فأكثر) قبل النشر. يُستخدم مرة واحدة عند إنشاء حساب المالك.
+    function SETUP() { return 'CHANGE_ME_TO_A_LONG_SECRET_CODE'; }
+    function root() { return /databases/$(database)/documents; }
+    function isAdmin() { return request.auth != null && exists(/databases/$(database)/documents/config/owner)
+      && get(/databases/$(database)/documents/config/owner).data.uid == request.auth.uid; }
+    function me() { return request.auth != null; }
+    // حد المعدّل: لا أكثر من عملية كل s ثانية لكل مستخدم
+    function fresh(f, s) {
+      let p = /databases/$(database)/documents/users/$(request.auth.uid);
+      return getAfter(p).data[f] == request.time
+        && (!exists(p) || !(f in get(p).data) || get(p).data[f] < request.time - duration.value(s, 's'));
+    }
+
+    match /bootstrap/{c} {
+      allow create: if me() && request.auth.token.firebase.sign_in_provider == 'password'
+        && c == SETUP() && request.resource.data.keys().hasOnly(['uid']) && request.resource.data.uid == request.auth.uid
+        && !exists(/databases/$(database)/documents/config/owner);
+      allow read, update, delete: if false;
+    }
+    match /config/owner {
+      allow read: if me();
+      allow create: if me() && request.auth.token.firebase.sign_in_provider == 'password'
+        && request.resource.data.keys().hasOnly(['uid','email','pub'])
+        && request.resource.data.uid == request.auth.uid
+        && getAfter(/databases/$(database)/documents/bootstrap/$(SETUP())).data.uid == request.auth.uid
+        && !exists(/databases/$(database)/documents/config/owner);
+      allow update, delete: if false;
+    }
+    match /users/{u} {
+      allow read: if me() && request.auth.uid == u;
+      allow create, update: if me() && request.auth.uid == u && request.resource.data.keys().hasOnly(['lo','lm'])
+        && (!('lo' in request.resource.data) || request.resource.data.lo == request.time || request.resource.data.lo == resource.data.lo)
+        && (!('lm' in request.resource.data) || request.resource.data.lm == request.time || request.resource.data.lm == resource.data.lm);
+      allow delete: if false;
+    }
+    match /settings/{d} {
+      allow read: if true;
+      allow write: if isAdmin() && request.resource.data.keys().hasOnly(['prices','pay','support'])
+        && request.resource.data.prices.python is number && request.resource.data.prices.js is number && request.resource.data.prices.fin is number
+        && request.resource.data.support is string && request.resource.data.support.size() < 20;
+    }
+    match /orders/{id} {
+      allow create: if me() && fresh('lo', 60)
+        && request.resource.data.keys().hasOnly(['service','name','wa','phone','via','username','pw','price','shot','uid','status','ts'])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.status == 'جديد'
+        && request.resource.data.ts == request.time
+        && request.resource.data.service in ['python','js','fin']
+        && request.resource.data.via in ['wa','phone']
+        && request.resource.data.name is string && request.resource.data.name.size() >= 2 && request.resource.data.name.size() <= 60
+        && request.resource.data.wa.matches('^\\+?[0-9]{8,15}$') && request.resource.data.phone.matches('^\\+?[0-9]{8,15}$')
+        && request.resource.data.username.matches('^[A-Za-z0-9_.-]{3,30}$')
+        && request.resource.data.pw is string && request.resource.data.pw.size() < 700
+        && request.resource.data.shot is string && request.resource.data.shot.size() < 700000
+        && (!exists(/databases/$(database)/documents/settings/main)
+            || request.resource.data.price == get(/databases/$(database)/documents/settings/main).data.prices[request.resource.data.service]);
+      allow read: if isAdmin() || (me() && resource.data.uid == request.auth.uid);
+      allow update: if isAdmin() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status'])
+        && request.resource.data.status in ['جديد','تم التفعيل','مرفوض'];
+      allow delete: if isAdmin();
+      match /msgs/{m} {
+        allow read: if isAdmin() || (me() && get(/databases/$(database)/documents/orders/$(id)).data.uid == request.auth.uid);
+        allow create: if request.resource.data.keys().hasOnly(['text','from','ts'])
+          && request.resource.data.text is string && request.resource.data.text.size() > 0 && request.resource.data.text.size() <= 900
+          && request.resource.data.ts == request.time && (
+            (isAdmin() && request.resource.data.from == 'a') ||
+            (me() && request.resource.data.from == 'c' && fresh('lm', 2)
+              && get(/databases/$(database)/documents/orders/$(id)).data.uid == request.auth.uid));
+        allow update, delete: if false;
+      }
+    }
+  }
+}
